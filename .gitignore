@@ -2,7 +2,8 @@
 ##################
 credentials
 .vagrant
-*.tfstate*
+terraform.tfstate
+terraform.tfstate.backup
 .terraform
 keys/*
 
