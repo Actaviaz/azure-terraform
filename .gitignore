@@ -2,7 +2,9 @@
 ##################
 credentials
 .vagrant
-.tfstate
+*.tfstate*
+.terraform
+keys/*
 
 # Compiled source #
 ###################
