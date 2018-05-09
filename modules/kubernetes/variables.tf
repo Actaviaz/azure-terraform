@@ -1,6 +1,6 @@
 variable "resource_grp_name" {
   description = "Name of the resource group."
-  default = "containers_rsgrp"
+  default = "kubernetes_rsgrp"
 }
 
 variable "resource_grp_loc" {
@@ -8,19 +8,24 @@ variable "resource_grp_loc" {
   default = "westeurope"
 }
 
-variable "container_plat_name" {
+variable "kube_plat_name" {
   description = "Name of the container platform."
-  default = "azure_container_plat"
+  default = "azure_kubernetes"
+}
+
+variable "master_count" {
+  description = "Number of master nodes. Can be 1,3 or 5."
+  default = "3"
 }
 
 variable "master_dns_prefix" {
   description = "The DNS Prefix to use for the Container Service master nodes."
-  default = "kube-master"
+  default = "kube-master-xpto"
 }
 
-variable "container_master_user" {
+variable "master_user" {
   description = "Name of the Admin user for the container orchestration."
-  default = "cont_master"
+  default = "kube_master"
 }
 
 variable "key_path" {
@@ -28,9 +33,9 @@ variable "key_path" {
   default = "keys/container_key.pub"
 }
 
-variable "cont_agent_pool_name" {
+variable "kube_agent_pool_name" {
   description = "Name of the container agent pool."
-  default = "cont_agent_pool"
+  default = "kube_agent_pool"
 }
 
 variable "worker_node_count" {
@@ -38,14 +43,9 @@ variable "worker_node_count" {
   default = "3"
 }
 
-variable "worker_os" {
-  description = "OS for worker nodes."
-  default = "Linux"
-}
-
-variable "os_disk_size" {
-  description = "Disk size for the OS of the worker nodes, in GB."
-  default = 30
+variable "worker_dns_prefix" {
+  description = "DNS prefix for the workers."
+  default = "kube-worker"
 }
 
 variable "worker_vm_size" {
@@ -54,9 +54,14 @@ variable "worker_vm_size" {
 }
 
 variable "client_id" {
-  description = "Should be on the credentials file if not you must generate it."
+  description = "ID of the client for API requests. Should be provided on module use."
 }
 
 variable "client_secret" {
-  description = "Should be on the credentials file if not you must generate it."
+  description = "Password of the client for API requests. Should be provided on module use."
+}
+
+variable "diag_enabled" {
+  description = "Flag to mark if diagnostics should be enabled."
+  default = false
 }

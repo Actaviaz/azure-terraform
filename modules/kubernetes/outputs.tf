@@ -1,31 +1,15 @@
-output "container_orch_id" {
-  value = "${azurerm_kubernetes_cluster.container_orch.id}"
+output "kube_id" {
+  value = "${azurerm_container_service.kubernetes.id}"
 }
 
-output "container_orch_kube_config" {
-  value = "${azurerm_kubernetes_cluster.container_orch.kube_config_raw}"
+output "kube_master_fqdn" {
+  value = "${lookup(azurerm_container_service.kubernetes.master_profile[0], "fqdn")}"
 }
 
-output "username" {
-  value = "${azurerm_kubernetes_cluster.container_orch.kube_config.0.username}"
+output "kube_worker_fqdn" {
+  value = "${lookup(azurerm_container_service.kubernetes.agent_pool_profile[0], "fqdn")}"
 }
 
-output "password" {
-  value = "${azurerm_kubernetes_cluster.container_orch.kube_config.0.password}"
-}
-
-output "client_key" {
-  value = "${azurerm_kubernetes_cluster.container_orch.kube_config.0.client_key}"
-}
-
-output "client_certificate" {
-  value = "${azurerm_kubernetes_cluster.container_orch.kube_config.0.client_certificate}"
-}
-
-output "cluster_ca_certificate" {
-  value = "${azurerm_kubernetes_cluster.container_orch.kube_config.0.cluster_ca_certificate}"
-}
-
-output "host" {
-  value = "${azurerm_kubernetes_cluster.container_orch.kube_config.0.host}"
+output "kube_admin_user" {
+  value = "${var.master_user}"
 }
