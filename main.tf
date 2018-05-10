@@ -6,7 +6,44 @@ provider "azurerm" {
   tenant_id = "${var.tenant_id}"
 }
 
-# Create a single instance
+# Create the JenkinsCI instance
+module "jenkinsci_instance" {
+  source = "modules/instance/"
+  resource_grp_name = "management_rg"
+  storage_account_name = "managementstracc"
+  sec_grp_name = "management_sc_grp"
+  network_name = "management_network"
+  subnet_name = "management_subnet"
+  nic_name = "jenkins_nic"
+  nic_ip_conf_name = "jenkins_nic_conf"
+  pub_ip_name = "jenkins_pub_ip"
+  pub_ip_domain_label = "jenkins-xpto"
+  single_instance_name = "jenkins"
+  os_disk_name = "jenkinsdisk"
+  single_instance_hostname = "JenkinsCI"
+  instance_admin_user = "jenk_adm"
+  sec_rule_in_name = "Inbound access for SSH and Web access"
+  sec_rule_in_destination_range = ["22","8080"]
+}
+
+output "Jenkins Admin account name" {
+  value = "${module.jenkinsci_instance.admin_user}"
+}
+
+output "Jenkins Admin account password" {
+  value = "${module.jenkinsci_instance.admin_password}"
+}
+
+output "Jenkins Public IP" {
+  value = "${module.jenkinsci_instance.public_ip}"
+}
+
+output "Jenkins Public IP FQDN" {
+  value = "${module.jenkinsci_instance.public_ip_fqdn}"
+}
+
+/*
+# Create a single linux instance
 module "single_instance" {
   source = "modules/instance/"
 }
@@ -62,4 +99,21 @@ output "Swarm Worker FQDN" {
 
 output "Swarm Master Admin" {
   value = "${module.swarm_platform.swarm_admin_user}"
+}
+*/
+
+module "container_registry" {
+  source = "modules/container_registry"
+}
+
+output "Container Registry Login Server" {
+  value = "${module.container_registry.container_registry_login_server}"
+}
+
+output "Container Registry Admin User" {
+  value = "${module.container_registry.container_registry_admin_username}"
+}
+
+output "Container Registry Admin Password" {
+  value = "${module.container_registry.container_registry_admin_password}"
 }

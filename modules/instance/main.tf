@@ -45,7 +45,7 @@ resource "azurerm_network_security_rule" "single_instance_sc_inbound_rule" {
     access = "${var.sec_rule_access}"
     protocol = "${var.sec_rule_protocol}"
     source_port_range = "${var.sec_rule_in_source_range}"
-    destination_port_range = "${var.sec_rule_in_destination_range}"
+    destination_port_ranges = "${var.sec_rule_in_destination_range}"
     source_address_prefix = "${var.sec_rule_in_source_add_prefix}"
     destination_address_prefix = "${var.sec_rule_in_destination_add_prefix}"
 }

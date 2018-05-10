@@ -95,7 +95,7 @@ variable "sec_rule_out_destination_add_prefix" {
 
 variable "sec_rule_in_name" {
   description = "Name for the security group rule"
-  default = "Inbouund access for SSH"
+  default = "Inbound access for SSH"
 }
 
 variable "sec_rule_in_priority" {
@@ -114,8 +114,9 @@ variable "sec_rule_in_source_range" {
 }
 
 variable "sec_rule_in_destination_range" {
+  type = "list"
   description = "Destination Port or Range. Integer or range between 0 and 65535 or * to match any."
-  default = "22"
+  default = ["22"]
 }
 
 variable "sec_rule_in_source_add_prefix" {
