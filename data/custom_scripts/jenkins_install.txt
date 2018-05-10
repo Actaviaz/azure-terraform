@@ -1,0 +1,18 @@
+#cloud-config
+# Don't upgrade the package list on boot
+apt_upgrade: false
+
+# Preserve the sources.list, adds new entries to sources.list.d/
+apt_preserve_sources_list: true
+
+# Add an APT source list
+apt_sources:
+  - source: "deb https://pkg.jenkins.io/debian-stable binary/"
+    keyid: D50582E6
+    keyserver: http://pkg.jenkins.io/debian-stable/jenkins.io.key
+    filename: jenkins.list
+
+# Install packages
+runcmd:
+  - sudo apt install openjdk-8-jdk -y
+  - sudo apt install jenkins -y

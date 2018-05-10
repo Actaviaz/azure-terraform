@@ -6,6 +6,11 @@ provider "azurerm" {
   tenant_id = "${var.tenant_id}"
 }
 
+variable "jenkins_install" {
+  description = "File location for the cloud init conf."
+  default = "data/custom_scripts/jenkins_install.txt"
+}
+
 # Create the JenkinsCI instance
 module "jenkinsci_instance" {
   source = "modules/instance/"
@@ -24,6 +29,7 @@ module "jenkinsci_instance" {
   instance_admin_user = "jenk_adm"
   sec_rule_in_name = "Inbound access for SSH and Web access"
   sec_rule_in_destination_range = ["22","8080"]
+  os_custom_data = "${file(var.jenkins_install)}"
 }
 
 output "Jenkins Admin account name" {
@@ -40,14 +46,6 @@ output "Jenkins Public IP" {
 
 output "Jenkins Public IP FQDN" {
   value = "${module.jenkinsci_instance.public_ip_fqdn}"
-}
-
-module "jenkins_install" {
-  source = "modules/jenkins-install"
-  rsgrp_name = "${module.jenkinsci_instance.resource_group_name}"
-  location = "${module.jenkinsci_instance.resource_group_loc}"
-  vm_name = "${module.jenkinsci_instance.instance_name}"
-  ext_name = "${format("ext_%s", module.jenkinsci_instance.instance_name)}"
 }
 
 /*

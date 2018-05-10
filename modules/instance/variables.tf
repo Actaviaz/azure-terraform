@@ -253,3 +253,8 @@ variable "key_path" {
   description = "Path to the public key for ssh auth."
   default = "keys/linux_key.pub"
 }
+
+variable "os_custom_data" {
+  description = "Adds custom data to the cloud init script."
+  default = ""
+}

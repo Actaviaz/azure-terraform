@@ -115,6 +115,7 @@ resource "azurerm_virtual_machine" "single_instance" {
     computer_name = "${var.single_instance_hostname}"
     admin_username = "${var.instance_admin_user}"
     admin_password = "${var.os_type == "linux" ? "" : var.instance_admin_passwd}"
+    custom_data = "${var.os_custom_data}"
   }
   os_profile_linux_config {
     disable_password_authentication = true
