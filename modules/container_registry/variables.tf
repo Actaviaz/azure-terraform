@@ -1,11 +1,9 @@
 variable "resource_grp_name" {
   description = "Name of the resource group."
-  default = "single_inst_rsgrp"
 }
 
 variable "resource_grp_loc" {
   description = "Location of the resource group."
-  default = "westeurope"
 }
 
 variable "str_account_name" {

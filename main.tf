@@ -6,12 +6,12 @@ provider "azurerm" {
   tenant_id = "${var.tenant_id}"
 }
 
-variable "jenkins_install" {
+variable "jenkins_install_script" {
   description = "File location for the cloud init conf."
   default = "data/custom_scripts/jenkins_install.txt"
 }
 
-# Create the JenkinsCI instance
+# Create the JenkinsCI instance and install the required software
 module "jenkinsci_instance" {
   source = "modules/instance/"
   resource_grp_name = "management_rg"
@@ -29,7 +29,7 @@ module "jenkinsci_instance" {
   instance_admin_user = "jenk_adm"
   sec_rule_in_name = "Inbound access for SSH and Web access"
   sec_rule_in_destination_range = ["22","8080"]
-  os_custom_data = "${file(var.jenkins_install)}"
+  os_custom_data = "${file(var.jenkins_install_script)}"
 }
 
 output "Jenkins Admin account name" {
@@ -48,31 +48,10 @@ output "Jenkins Public IP FQDN" {
   value = "${module.jenkinsci_instance.public_ip_fqdn}"
 }
 
-/*
-# Create a single linux instance
-module "single_instance" {
-  source = "modules/instance/"
-}
-
-output "Admin account name" {
-  value = "${module.single_instance.admin_user}"
-}
-
-output "Admin account password" {
-  value = "${module.single_instance.admin_password}"
-}
-
-output "Public IP" {
-  value = "${module.single_instance.public_ip}"
-}
-
-output "Public IP FQDN" {
-  value = "${module.single_instance.public_ip_fqdn}"
-}
-
 # Create a Kubernetes cluster platform
 module "kubernetes_platform" {
   source = "modules/kubernetes"
+  resource_grp_loc = "${module.jenkinsci_instance.resource_group_loc}"
   client_id = "${var.client_id}"
   client_secret = "${var.client_secret}"
 }
@@ -89,7 +68,26 @@ output "Kubernetes Worker FQDN" {
   value = "${module.kubernetes_platform.kube_worker_fqdn}"
 }
 
+module "container_registry" {
+  source = "modules/container_registry"
+  resource_grp_name = "${module.kubernetes_platform.resource_group_name}"
+  resource_grp_loc = "${module.kubernetes_platform.resource_group_location}"
+  container_reg_name = "azcontregxpto"
+}
 
+output "Container Registry Login Server" {
+  value = "${module.container_registry.container_registry_login_server}"
+}
+
+output "Container Registry Admin User" {
+  value = "${module.container_registry.container_registry_admin_username}"
+}
+
+output "Container Registry Admin Password" {
+  value = "${module.container_registry.container_registry_admin_password}"
+}
+
+/*
 # Create a Swarm cluster platform
 module "swarm_platform" {
   source = "modules/swarm"
@@ -107,19 +105,3 @@ output "Swarm Master Admin" {
   value = "${module.swarm_platform.swarm_admin_user}"
 }
 */
-
-/*module "container_registry" {
-  source = "modules/container_registry"
-}
-
-output "Container Registry Login Server" {
-  value = "${module.container_registry.container_registry_login_server}"
-}
-
-output "Container Registry Admin User" {
-  value = "${module.container_registry.container_registry_admin_username}"
-}
-
-output "Container Registry Admin Password" {
-  value = "${module.container_registry.container_registry_admin_password}"
-}*/

@@ -1,3 +1,11 @@
+output "resource_group_name" {
+  value = "${azurerm_resource_group.kubernetes_rg.name}"
+}
+
+output "resource_group_location" {
+  value = "${azurerm_resource_group.kubernetes_rg.location}"
+}
+
 output "kube_id" {
   value = "${azurerm_container_service.kubernetes.id}"
 }
