@@ -2,6 +2,14 @@ output "resource_group_id" {
   value = "${azurerm_resource_group.single_instance_rs_grp.id}"
 }
 
+output "resource_group_name" {
+  value = "${azurerm_resource_group.single_instance_rs_grp.name}"
+}
+
+output "resource_group_loc" {
+  value = "${azurerm_resource_group.single_instance_rs_grp.location}"
+}
+
 output "storage_account_id"{
   value = "${azurerm_storage_account.single_instance_str_acc.id}"
 }
@@ -24,6 +32,10 @@ output "public_ip" {
 
 output "public_ip_fqdn" {
   value = "${azurerm_public_ip.single_instance_pub_ip.fqdn}"
+}
+
+output "instance_name" {
+  value = "${azurerm_virtual_machine.single_instance.name}"
 }
 
 output "admin_user" {

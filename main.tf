@@ -42,6 +42,14 @@ output "Jenkins Public IP FQDN" {
   value = "${module.jenkinsci_instance.public_ip_fqdn}"
 }
 
+module "jenkins_install" {
+  source = "modules/jenkins-install"
+  rsgrp_name = "${module.jenkinsci_instance.resource_group_name}"
+  location = "${module.jenkinsci_instance.resource_group_loc}"
+  vm_name = "${module.jenkinsci_instance.instance_name}"
+  ext_name = "${format("ext_%s", module.jenkinsci_instance.instance_name)}"
+}
+
 /*
 # Create a single linux instance
 module "single_instance" {
@@ -102,7 +110,7 @@ output "Swarm Master Admin" {
 }
 */
 
-module "container_registry" {
+/*module "container_registry" {
   source = "modules/container_registry"
 }
 
@@ -116,4 +124,4 @@ output "Container Registry Admin User" {
 
 output "Container Registry Admin Password" {
   value = "${module.container_registry.container_registry_admin_password}"
-}
+}*/
