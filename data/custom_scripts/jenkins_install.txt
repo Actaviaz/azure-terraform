@@ -14,5 +14,8 @@ apt_sources:
 
 # Install packages
 runcmd:
-  - sudo apt install openjdk-8-jdk -y
+  - sudo apt install openjdk-8-jdk  -y
   - sudo apt install jenkins -y
+  - sudo apt install docker.io -y
+  - sudo usermod -aG docker jenkins
+  - sudo service jenkins restart
