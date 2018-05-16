@@ -1,6 +1,6 @@
 # Azure CI/CD with Terraform  
 This project aims to deploy a complete CI/CD Pipeline without user interaction. That pipeline will be using Jenkins and Azure Container Services / Registry.  
-
+![Azure infrastructure example](https://raw.githubusercontent.com/j-furtado/azure-terraform/master/docs/az_infra.png)  
 ## Getting Started  
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.  
 ### Prerequisites  
