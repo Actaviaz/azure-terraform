@@ -5,15 +5,15 @@ This project aims to deploy a complete CI/CD Pipeline without user interaction. 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.  
 ### Prerequisites  
 Things you will need to install:  
-1) Terraform;  
-2) Azure CLI;  
-3) Kubectl (optional);  
+* **Terraform;**
+* **Azure CLI;**
+* **Kubectl (optional);**
 ### Installing  
 To start using Terraform, you'll have to prepare your environment. To setup Azure credentials and Terraform, go to:  
 https://docs.microsoft.com/en-us/azure/virtual-machines/linux/terraform-install-configure  
 
 To set up, some operations must be done first:  
-1) Generate the credentials file:  
+1) Generate the **credentials** file:  
 Create a file on the project root dir and add the following values that you got from Azure Cli:  
 ```
 subscription_id = "Subscription ID"  
@@ -21,9 +21,9 @@ client_id = "Application ID"
 client_secret = "Password"  
 tenant_id = "Tenant ID"  
 ```
-2) Generate the keys for Jenkins Linux machines and Azure Container Service Master (in this case, Kubernetes masters):  
-Use ssh_keygen. The default path where the scripts will look for the keys is keys/*  
-By default, the modules depend on "linux_key" and "container_key". You can change the names with variables.  
+2) Generate the **keys** for Jenkins Linux machines and Azure Container Service Master (in this case, Kubernetes masters):  
+Use **ssh_keygen**. The default path where the scripts will look for the keys is **keys/***.
+By default, the modules depend on **linux_key** and **container_key**. You can change the names with variables.  
 The keys folder should look like this:
 ```
 ls -la keys/
@@ -49,7 +49,7 @@ To apply the configuration to your Azure cloud run:
 terraform apply -var-file=<credentials>
 ```
 ### Outputs
-This process should take around 15-20 minutes to run. In the end it will display all the values needed to access the infrastructure:  
+This process should take around **15-20** minutes to run. In the end it will display all the values needed to access the infrastructure:  
 ```
 Container Registry Admin Password = <container registry password>  
 Container Registry Admin User = <container registry admin user>  
