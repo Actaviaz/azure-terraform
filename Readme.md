@@ -162,6 +162,73 @@ Assuming you didn't make changes without scripting them in Terraform, everything
 This process should take around **10-15** minutes.
 
 ## Accessing Jenkins
-To access your Jenkins server Web UI, open the browser on http:// < Jenkins FQDN > :8080.
+### Complete the setup operations.
+To access your Jenkins server Web UI, open the browser on http://< Jenkins FQDN\>:8080.
 
-The first step you have to do is to create an Admin Account and add the base plugins.
+The first step you have to do is to create an Admin Account and add the base plugins. You will be prompted to insert a secret located on the Jenkins instance. Access it through SSH and find the secret located on the file described on the UI. Install the suggested plugins. The specific ones will be coming later.
+
+Create the Admin account for the Web UI and login on the portal.
+
+### Install the required plugins
+Access the **Manage Jenkins** menu and go to **Manage Plugins**. Select the **Available** tab. Install the following plugins:
+* **Azure Container Service** - tested on v0.2.3
+* **Azure Credentials** - tested on v1.6.0
+* **Azure Commons** - tested on v0.2.6
+* **Docker API** - tested on v3.0.14
+* **Docker** - tested on v1.1.4
+* **Kubernetes Continuous Deploy** - tested on v0.2.1
+* **GitHub Authentication** - tested on v0.29
+* **GitHub Integration** - tested on v0.1.0-rc29
+
+Press download and install and click the *Restart Jenkins when installation is complete and no jobs are running* checkbox. After your Jenkins service restarts, the plugins should all be installed.
+
+### Add the credentials required for the pipelines
+Access the **Credentials** menu, then **System** and finally **Global credentials**. It's best practice to use domains but for now it's not going to be used.
+
+On the **Global credentials (unrestricted)**, click on **Add Credentials** on the left. You need to add the following credentials:
+#### Azure Container Registry
+The type should be **Username with password**, where your username and password are the information return in the Terraform outputs:
+* *Container Registry Admin User*
+* *Container Registry Admin Password*
+
+Give that account a friendly ID since you will use it on your pipeline scripts.
+#### Kubernetes Master SSH credentials
+The type should be **SSH Username with private key**, where your username and key are the ones used in Terraform:
+* *Kubernetes SSH Username*
+* The private key that you used. By default it uses the container_key.
+
+You can choose to add that key directly to avoid uploads. If you added a passphrase, add it here too. If not, leave it blank.
+
+Give that account a friendly ID since you will use it on your pipeline scripts.
+
+#### Azure Service Account
+The type should be **Microsoft Azure Service Principal**. You can either generate a new service principal (same process you used to generate the credentials file) or use the credentials file. The values you will have to fill are:
+* Subscription ID
+* Client ID
+* Client Secret
+* Tenant ID
+
+The environment should be Azure.
+
+Give that account a friendly ID since you will use it on your pipeline scripts.
+
+#### GitHub Secrect
+You will need a secret to assure the communication with GitHub webhooks. You can generate a secret for your GitHub account. That way, all your projects will be integrated easily. The basics should be: *public_repo, repo:status, write:repo_hook*
+
+The type should be **Secret Text**. You will have to fill:
+* Secret
+
+Give that account a friendly ID since you will use it on your pipeline scripts.
+
+#### General Credentials Layout
+This image should give you a general idea on what it should look like after you're done.
+![Jenkins Credentials example](docs/jenkins_creds.png?raw=true)
+
+### Setting up GitHub
+The next step is to configure the communication with the GitHub server. To do that go to **Manage Jenkins** > **Configure System**. Find the GitHub  configuration. Click on **Add GitHub Server** and then **GitHub Server**. Give it a name (for ID purposes) and set the credentials as your secret. The API server should be already set as https://api.github.com.
+
+Test your connection. It should say something like *"Credentials verified for user xxxxxx, rate limit: 4998"*
+
+Expand the hooks section and set your GitHub secret there too. Save the configurations when you're done.
+
+**Jenkins should now be ready for you to create your pipelines!**
