@@ -7,9 +7,9 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 Things you will need to install:
-* **Terraform;**
-* **Azure CLI;**
-* **Kubectl (optional);**
+* **Terraform** - Terraform v0.11.7 with provider.azurerm v1.4.0
+* **Azure CLI** - Azure-cli v2.0.32 with Python (Windows) 3.6.1
+* **Kubectl (optional)** - Kubectl v1.10.2 on Windows
 
 ### Installing
 To start using Terraform, you'll have to prepare your environment. To setup Azure credentials and Terraform, go to:
@@ -108,15 +108,17 @@ terraform apply -var-file=<credentials>
 ### Outputs
 This process should take around **15-20** minutes to run. In the end it will display all the values needed to access the infrastructure:
 ```
-Container Registry Admin Password = <container registry password>
-Container Registry Admin User = <container registry admin user>
-Container Registry Login Server = <container registry login server>
-Jenkins Admin account name = <jenkins ssh user>
-Jenkins Admin account password = Use private key
-Jenkins Public IP = <jenkins public IP>
-Jenkins Public IP FQDN = <jenkins public IP FQDN>
+Container Registry Admin Password = <Container Registry password>
+Container Registry Admin User = <Container Registry admin user>
+Container Registry Login Server = <Container Registry login server>
+Jenkins Public IP = <Jenkins public IP>
+Jenkins Public IP FQDN = <Jenkins public IP FQDN>
+Jenkins SSH Username = <Jenkins ssh user>
+Jenkins usage = <How to access the Jenkins server through SSH>
+Jenkins web access = <How to access Jenkins server through Web UI>
 Kubernetes Master FQDN = <Kubernetes master public IP FQDN>
-Kubernetes admin username = <Kubernetes master ssh user>
+Kubernetes SSH Username = <Kubernetes master ssh user>
+Kubernetes usage = <How to access the Kubernetes master through SSH>
 ```
 ## Alternative builds
 ### Changing default values
@@ -130,3 +132,12 @@ To tweak these values, edit the variables.tf in the project root directory and c
 You can also use the Swarm module to build a Swarm cluster instead of a Kubernetes cluster. Your Jenkins pipeline definition will have to change to take that into consideration.
 
 To change it, edit the main.tf in the project root directory, comment out the Kubernetes module definition and outputs and uncomment the Swarm module configuration and its outputs.
+
+## Destroying the environment
+If you wish to destroy the environment, just run:
+```
+terraform destroy -var-file=<credentials>
+```
+Assuming you didn't make changes without scripting them in Terraform, everything should be deleted without issues.
+
+This process should take around **10-15** minutes.
