@@ -11,7 +11,7 @@ output "admin_user" {
 }
 
 output "usage" {
-  value = "ssh -i ${var.key_path} ${var.instance_admin_user}@${azurerm_public_ip.single_instance_pub_ip.fqdn}"
+  value = "ssh -i <private_key> ${var.instance_admin_user}@${azurerm_public_ip.single_instance_pub_ip.fqdn}"
 }
 
 output "web" {

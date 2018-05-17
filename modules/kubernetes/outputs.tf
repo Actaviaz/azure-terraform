@@ -7,5 +7,5 @@ output "kube_admin_user" {
 }
 
 output "usage" {
-  value = "ssh -i ${var.key_path} ${var.master_user}@${lookup(azurerm_container_service.kubernetes.master_profile[0], "fqdn")}"
+  value = "ssh -i <private_key> ${var.master_user}@${lookup(azurerm_container_service.kubernetes.master_profile[0], "fqdn")}"
 }
