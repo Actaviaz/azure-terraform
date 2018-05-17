@@ -232,3 +232,18 @@ Test your connection. It should say something like *"Credentials verified for us
 Expand the hooks section and set your GitHub secret there too. Save the configurations when you're done.
 
 **Jenkins should now be ready for you to create your pipelines!**
+
+## Creating a Kubernetes Secret for ACR access
+Since we are using a private Container Registry, Kubernetes will need a secret with the ACR credentials to be able to pull the images.
+
+To create one you can either use kubectl on your local machine or login to the Kubernetes master and work there.
+
+To create a secret do:
+```
+kubectl create secret docker-registry <secret name> --docker-server=http://<Container Registry Login Server> --docker-username=<Container Registry Admin User> --docker-password=<Container Registry Admin User> --docker-email=<Email>
+```
+You can add *--dry-run* to test the command before you commit.
+
+It should return *secret "< secret name >" created*
+
+**Important:** Make sure you remember the secret name. It will be used in your Jenkins pipeline and Kubernetes deployment.yaml file.
