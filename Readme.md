@@ -92,6 +92,25 @@ Starting to serve on 127.0.0.1:8001
 ```
 Then open your browser on http://localhost:8001/api/v1/proxy/namespaces/kube-system/services/kubernetes-dashboard.
 
+If you get an error "no endpoints available for service \"kubernetes-dashboard\"", wait a bit.
+
+Kubernetes takes a while to run all the pods necessary to the cluster. You can login to the Kubernetes master and run:
+```
+kubectl get pods --all-namespaces=true
+NAME                                            READY     STATUS    RESTARTS   AGE
+heapster-2888171832-vb3bp                       0/2       Pending   0          14m
+kube-addon-manager-k8s-master-5c375e5e-0        1/1       Running   0          13m
+kube-apiserver-k8s-master-5c375e5e-0            1/1       Running   0          13m
+kube-controller-manager-k8s-master-5c375e5e-0   1/1       Running   0          14m
+kube-dns-v20-3003781527-54qsx                   0/3       Pending   0          14m
+kube-dns-v20-3003781527-mt0n9                   0/3       Pending   0          14m
+kube-proxy-nwq8p                                1/1       Running   0          14m
+kube-scheduler-k8s-master-5c375e5e-0            1/1       Running   0          13m
+kubernetes-dashboard-924040265-n8xhl            0/1       Pending   0          14m
+tiller-deploy-677436516-n6q3d                   0/1       Pending   0          14m
+```
+When all is running, the Web UI should start working.
+
 ## Building the cloud environment
 To initialize the modules run:
 ```
