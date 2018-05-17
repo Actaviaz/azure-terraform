@@ -162,6 +162,6 @@ Assuming you didn't make changes without scripting them in Terraform, everything
 This process should take around **10-15** minutes.
 
 ## Accessing Jenkins
-To access your Jenkins server Web UI, open the browser on http://<Jenkins FQDN>:8080.
+To access your Jenkins server Web UI, open the browser on http:// < Jenkins FQDN > :8080.
 
 The first step you have to do is to create an Admin Account and add the base plugins.
