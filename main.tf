@@ -6,38 +6,74 @@ provider "azurerm" {
   tenant_id = "${var.tenant_id}"
 }
 
+#### Creates the resource groups needed for the platform
+# Creates the Resource Group for the Jenkins Instance
+resource "azurerm_resource_group" "management_rs_grp" {
+  name = "management_rsgrp"
+  location = "${var.infra_loc}"
+}
+
+# Creates the Resource Group for the container platform
+resource "azurerm_resource_group" "container_rg" {
+  name = "container_mgmt_rsgrp"
+  location = "${var.infra_loc}"
+}
+
+#### Create the manangement network and subnet
+# Create the management network
+resource "azurerm_virtual_network" "management_network" {
+  name = "management_network"
+  resource_group_name = "${azurerm_resource_group.management_rs_grp.name}"
+  location = "${azurerm_resource_group.management_rs_grp.location}"
+  address_space = ["192.168.0.0/16"]
+  dns_servers = []
+}
+
+# Create the management subnet
+resource "azurerm_subnet" "management_subnet" {
+  name = "management_subnet"
+  resource_group_name = "${azurerm_resource_group.management_rs_grp.name}"
+  virtual_network_name = "${azurerm_virtual_network.management_network.name}"
+  address_prefix = "192.168.1.0/24"
+}
+
+####                       ####
+#     Platform Definition     #
+####                       ####
 variable "jenkins_install_script" {
   description = "File location for the cloud init conf."
-  default = "data/custom_scripts/jenkins_install.txt"
+  default = "data/custom_scripts/jenkins_install"
 }
 
 # Create the JenkinsCI instance and install the required software
 module "jenkinsci_instance" {
+  # Loads the module to create an instance
   source = "modules/instance/"
-  resource_grp_name = "management_rg"
-  storage_account_name = "managementstracc"
-  sec_grp_name = "management_sc_grp"
-  network_name = "management_network"
-  subnet_name = "management_subnet"
-  nic_name = "jenkins_nic"
-  nic_ip_conf_name = "jenkins_nic_conf"
-  pub_ip_name = "jenkins_pub_ip"
-  pub_ip_domain_label = "jenkins-xpto"
-  single_instance_name = "jenkins"
-  os_disk_name = "jenkinsdisk"
-  single_instance_hostname = "JenkinsCI"
-  instance_admin_user = "jenk_adm"
-  sec_rule_in_name = "Inbound access for SSH and Web access"
-  sec_rule_in_destination_range = ["22","8080"]
+  ####                                    ####
+  #     Support infrastructure variables     #
+  ####                                    ####
+  resource_grp_name = "${azurerm_resource_group.management_rs_grp.name}"
+  resource_loc = "${azurerm_resource_group.management_rs_grp.location}"
+  network_name = "${azurerm_virtual_network.management_network.name}"
+  subnet_id = "${azurerm_subnet.management_subnet.id}"
+  sec_grp_name = "jenkins_sc_grp"
+  nic_name = "jenkins_mgmt_nic"
+  sec_rule_in_name = "Inbound access for Jenkins machine"
   os_custom_data = "${file(var.jenkins_install_script)}"
+  ####                          ####
+  #     User defined variables     #
+  ####                          ####
+  pub_ip_domain_label = "${var.jenkings_dns_prefix}"
+  single_instance_name = "${var.jenkins_instance_name}"
+  single_instance_hostname = "${var.jenkings_dns_prefix}"
+  instance_admin_user = "${var.jenkins_ssh_username}"
+  sec_rule_in_destination_range = "${var.port_dest_range}"
+  key_path = "${var.public_key_path}"
+  os_disk_name = "jenkinsosdisk"
 }
 
-output "Jenkins Admin account name" {
+output "Jenkins SSH Username" {
   value = "${module.jenkinsci_instance.admin_user}"
-}
-
-output "Jenkins Admin account password" {
-  value = "${module.jenkinsci_instance.admin_password}"
 }
 
 output "Jenkins Public IP" {
@@ -48,15 +84,37 @@ output "Jenkins Public IP FQDN" {
   value = "${module.jenkinsci_instance.public_ip_fqdn}"
 }
 
-# Create a Kubernetes cluster platform
-module "kubernetes_platform" {
-  source = "modules/kubernetes"
-  resource_grp_loc = "${module.jenkinsci_instance.resource_group_loc}"
-  client_id = "${var.client_id}"
-  client_secret = "${var.client_secret}"
+output "Jenkins usage" {
+  value = "${module.jenkinsci_instance.usage}"
 }
 
-output "Kubernetes admin username" {
+output "Jenkins web access" {
+  value = "${module.jenkinsci_instance.web}"
+}
+
+# Create a Kubernetes cluster platform
+module "kubernetes_platform" {
+  # Loads the module
+  source = "modules/kubernetes"
+  # Credentials since Kubernetes needs it to deploy
+  client_id = "${var.client_id}"
+  client_secret = "${var.client_secret}"
+  # Allocates the cluster in the resource group for it
+  resource_grp_name = "${azurerm_resource_group.container_rg.name}"
+  resource_loc = "${azurerm_resource_group.container_rg.location}"
+  ####                          ####
+  #     User defined variables     #
+  ####                          ####
+  kube_plat_name = "${var.container_plat_name}"
+  master_count = "${var.master_node_count}"
+  master_dns_prefix = "${var.master_dns}"
+  master_user = "${var.master_ssh_user}"
+  key_path = "${var.key_root_folder}${var.master_ssh_key}"
+  worker_node_count = "${var.worker_node_count}"
+  worker_vm_size = "${var.worker_vm_type}"
+}
+
+output "Kubernetes SSH Username" {
   value = "${module.kubernetes_platform.kube_admin_user}"
 }
 
@@ -64,15 +122,53 @@ output "Kubernetes Master FQDN" {
   value = "${module.kubernetes_platform.kube_master_fqdn}"
 }
 
-output "Kubernetes Worker FQDN" {
-  value = "${module.kubernetes_platform.kube_worker_fqdn}"
+output "Kubernetes usage" {
+  value = "${module.kubernetes_platform.usage}"
 }
 
+/*
+# Create a Swarm cluster platform
+module "swarm_platform" {
+  source = "modules/swarm"
+  # Loads the module
+  source = "modules/kubernetes"
+  # Allocates the cluster in the resource group for it
+  resource_grp_name = "${azurerm_resource_group.container_rg.name}"
+  resource_loc = "${azurerm_resource_group.container_rg.location}"
+  ####                          ####
+  #     User defined variables     #
+  ####                          ####
+  swarm_plat_name = "${var.container_plat_name}"
+  master_count = "${var.master_node_count}"
+  master_dns_prefix = "${var.master_dns}"
+  master_user = "${var.master_ssh_user}"
+  key_path = "${var.key_root_folder}${var.master_ssh_key}"
+  worker_node_count = "${var.worker_node_count}"
+  worker_vm_size = "${var.worker_vm_type}"
+}
+
+output "Swarm SSH Username" {
+  value = "${module.swarm_platform.swarm_admin_user}"
+}
+output "Swarm Master FQDN" {
+  value = "${module.swarm_platform.swarm_master_fqdn}"
+}
+
+output "Swarm usage" {
+  value = "${module.swarm_platform.usage}"
+}
+*/
+
+# Creates the Container Registry, for your container images
 module "container_registry" {
   source = "modules/container_registry"
-  resource_grp_name = "${module.kubernetes_platform.resource_group_name}"
-  resource_grp_loc = "${module.kubernetes_platform.resource_group_location}"
-  container_reg_name = "azcontregxpto"
+  # Will use the same resource group as the container platform
+  resource_grp_name = "${azurerm_resource_group.container_rg.name}"
+  resource_loc = "${azurerm_resource_group.container_rg.location}"
+  /*
+  * User defined variables
+  */
+  container_reg_name = "${var.acr_dns_prefix}"
 }
 
 output "Container Registry Login Server" {
@@ -86,22 +182,3 @@ output "Container Registry Admin User" {
 output "Container Registry Admin Password" {
   value = "${module.container_registry.container_registry_admin_password}"
 }
-
-/*
-# Create a Swarm cluster platform
-module "swarm_platform" {
-  source = "modules/swarm"
-}
-
-output "Swarm Master FQDN" {
-  value = "${module.swarm_platform.swarm_master_fqdn}"
-}
-
-output "Swarm Worker FQDN" {
-  value = "${module.swarm_platform.swarm_worker_fqdn}"
-}
-
-output "Swarm Master Admin" {
-  value = "${module.swarm_platform.swarm_admin_user}"
-}
-*/

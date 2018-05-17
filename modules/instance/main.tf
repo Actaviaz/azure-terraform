@@ -1,29 +1,20 @@
-# Create a resource group
-resource "azurerm_resource_group" "single_instance_rs_grp" {
-  name = "${var.resource_grp_name}"
-  location = "${var.resource_grp_loc}"
-}
-
-# Create a storage account group
-resource "azurerm_storage_account" "single_instance_str_acc" {
-  name = "${var.storage_account_name}"
-  resource_group_name = "${azurerm_resource_group.single_instance_rs_grp.name}"
-  location = "${azurerm_resource_group.single_instance_rs_grp.location}"
-  account_tier = "${var.storage_account_tier}"
-  account_replication_type = "${var.storage_account_rep_type}"
+# Variable composition
+locals {
+  nic_conf_name = "${var.nic_name}_conf"
+  pub_ip_name = "${var.single_instance_name}_pub_ip"
 }
 
 # Create a security group
 resource "azurerm_network_security_group" "single_instance_sc_grp"{
   name = "${var.sec_grp_name}"
-  resource_group_name = "${azurerm_resource_group.single_instance_rs_grp.name}"
-  location = "${azurerm_resource_group.single_instance_rs_grp.location}"
+  resource_group_name = "${var.resource_grp_name}"
+  location = "${var.resource_loc}"
 }
 
 # Create security group Outbound rule
 resource "azurerm_network_security_rule" "single_instance_sc_outbound_rule" {
     name = "${var.sec_rule_out_name}"
-    resource_group_name = "${azurerm_resource_group.single_instance_rs_grp.name}"
+    resource_group_name = "${var.resource_grp_name}"
     network_security_group_name = "${azurerm_network_security_group.single_instance_sc_grp.name}"
     priority = "${var.sec_rule_out_priority}"
     direction = "${var.sec_rule_out_direction}"
@@ -38,7 +29,7 @@ resource "azurerm_network_security_rule" "single_instance_sc_outbound_rule" {
 # Create security group Inbound rule
 resource "azurerm_network_security_rule" "single_instance_sc_inbound_rule" {
     name = "${var.sec_rule_in_name}"
-    resource_group_name = "${azurerm_resource_group.single_instance_rs_grp.name}"
+    resource_group_name = "${var.resource_grp_name}"
     network_security_group_name = "${azurerm_network_security_group.single_instance_sc_grp.name}"
     priority = "${var.sec_rule_in_priority}"
     direction = "${var.sec_rule_in_direction}"
@@ -50,29 +41,11 @@ resource "azurerm_network_security_rule" "single_instance_sc_inbound_rule" {
     destination_address_prefix = "${var.sec_rule_in_destination_add_prefix}"
 }
 
-# Create a network
-resource "azurerm_virtual_network" "single_instance_network" {
-  name = "${var.network_name}"
-  resource_group_name = "${azurerm_resource_group.single_instance_rs_grp.name}"
-  location = "${azurerm_resource_group.single_instance_rs_grp.location}"
-  address_space = "${var.network_address_space}"
-  dns_servers = "${var.dns_servers}"
-}
-
-# Create a subnet
-resource "azurerm_subnet" "single_instance_subnet" {
-  name = "${var.subnet_name}"
-  resource_group_name = "${azurerm_resource_group.single_instance_rs_grp.name}"
-  virtual_network_name = "${azurerm_virtual_network.single_instance_network.name}"
-  network_security_group_id = "${azurerm_network_security_group.single_instance_sc_grp.id}"
-  address_prefix = "${var.subnet_address}"
-}
-
 # Create a public IP
 resource "azurerm_public_ip" "single_instance_pub_ip" {
-  name = "${var.pub_ip_name}"
-  location = "${azurerm_resource_group.single_instance_rs_grp.location}"
-  resource_group_name = "${azurerm_resource_group.single_instance_rs_grp.name}"
+  name = "${local.pub_ip_name}"
+  location = "${var.resource_loc}"
+  resource_group_name = "${var.resource_grp_name}"
   public_ip_address_allocation = "${var.pub_ip_alloc}"
   domain_name_label = "${var.pub_ip_domain_label}"
 }
@@ -80,11 +53,12 @@ resource "azurerm_public_ip" "single_instance_pub_ip" {
 # Create network interface
 resource "azurerm_network_interface" "single_instance_nic" {
   name = "${var.nic_name}"
-  resource_group_name = "${azurerm_resource_group.single_instance_rs_grp.name}"
-  location = "${azurerm_resource_group.single_instance_rs_grp.location}"
+  resource_group_name = "${var.resource_grp_name}"
+  location = "${var.resource_loc}"
+  network_security_group_id = "${azurerm_network_security_group.single_instance_sc_grp.id}"
   ip_configuration {
-    name = "${var.nic_ip_conf_name}"
-    subnet_id = "${azurerm_subnet.single_instance_subnet.id}"
+    name = "${local.nic_conf_name}"
+    subnet_id = "${var.subnet_id}"
     private_ip_address_allocation = "${var.nic_ip_alloc}"
     public_ip_address_id = "${azurerm_public_ip.single_instance_pub_ip.id}"
   }
@@ -93,8 +67,8 @@ resource "azurerm_network_interface" "single_instance_nic" {
 # Create the instance
 resource "azurerm_virtual_machine" "single_instance" {
   name = "${var.single_instance_name}"
-  location = "${azurerm_resource_group.single_instance_rs_grp.location}"
-  resource_group_name = "${azurerm_resource_group.single_instance_rs_grp.name}"
+  location = "${var.resource_loc}"
+  resource_group_name = "${var.resource_grp_name}"
   network_interface_ids = ["${azurerm_network_interface.single_instance_nic.id}"]
   vm_size = "${var.single_instance_size}"
   delete_os_disk_on_termination = "${var.delete_os_disk_on_termination}"
@@ -114,7 +88,7 @@ resource "azurerm_virtual_machine" "single_instance" {
   os_profile {
     computer_name = "${var.single_instance_hostname}"
     admin_username = "${var.instance_admin_user}"
-    admin_password = "${var.os_type == "linux" ? "" : var.instance_admin_passwd}"
+    admin_password = ""
     custom_data = "${var.os_custom_data}"
   }
   os_profile_linux_config {

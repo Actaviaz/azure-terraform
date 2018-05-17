@@ -1,13 +1,12 @@
-# Creates the Resource Group for the container platform
-resource "azurerm_resource_group" "kubernetes_rg" {
-  name = "${var.resource_grp_name}"
-  location = "${var.resource_grp_loc}"
+# Variable composition
+locals {
+  agent_pool_name = "${var.kube_plat_name}-ag_pool"
 }
 
 # Creates the container platform
 resource "azurerm_container_service" "kubernetes" {
-  resource_group_name = "${azurerm_resource_group.kubernetes_rg.name}"
-  location = "${azurerm_resource_group.kubernetes_rg.location}"
+  resource_group_name = "${var.resource_grp_name}"
+  location = "${var.resource_loc}"
   name = "${var.kube_plat_name}"
   orchestration_platform = "Kubernetes"
   master_profile {
@@ -21,7 +20,7 @@ resource "azurerm_container_service" "kubernetes" {
     }
   }
   agent_pool_profile {
-    name = "${var.master_user}"
+    name = "${local.agent_pool_name}"
     count = "${var.worker_node_count}"
     dns_prefix = "${var.worker_dns_prefix}"
     vm_size = "${var.worker_vm_size}"

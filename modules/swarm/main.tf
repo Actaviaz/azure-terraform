@@ -1,13 +1,12 @@
-# Creates the Resource Group for the Swarm platform
-resource "azurerm_resource_group" "swarm_rg" {
-  name = "${var.resource_grp_name}"
-  location = "${var.resource_grp_loc}"
+# Variable composition
+locals {
+  agent_pool_name = "${var.swarm_plat_name}-ag_pool"
 }
 
 # Creates the container platform
 resource "azurerm_container_service" "swarm" {
-  resource_group_name = "${azurerm_resource_group.swarm_rg.name}"
-  location = "${azurerm_resource_group.swarm_rg.location}"
+  resource_group_name = "${var.resource_grp_name}"
+  location = "${var.resource_loc}"
   name = "${var.swarm_plat_name}"
   orchestration_platform = "Swarm"
   master_profile {
@@ -15,13 +14,13 @@ resource "azurerm_container_service" "swarm" {
     dns_prefix = "${var.master_dns_prefix}"
   }
   linux_profile {
-    admin_username = "${var.swarm_master_user}"
+    admin_username = "${var.master_user}"
     ssh_key {
       key_data = "${file(var.key_path)}"
     }
   }
   agent_pool_profile {
-    name = "${var.swarm_agent_pool_name}"
+    name = "${local.agent_pool_name}"
     count = "${var.worker_node_count}"
     dns_prefix = "${var.worker_dns_prefix}"
     vm_size = "${var.worker_vm_size}"
