@@ -222,7 +222,7 @@ Give that account a friendly ID since you will use it on your pipeline scripts.
 
 #### General Credentials Layout
 This image should give you a general idea on what it should look like after you're done.
-![Jenkins Credentials example](docs/jenkins_creds.png?raw=true)
+![Jenkins Credentials example](docs/jenkins_creds_layout.png?raw=true)
 
 ### Setting up GitHub
 The next step is to configure the communication with the GitHub server. To do that go to **Manage Jenkins** > **Configure System**. Find the GitHub  configuration. Click on **Add GitHub Server** and then **GitHub Server**. Give it a name (for ID purposes) and set the credentials as your secret. The API server should be already set as https://api.github.com.
